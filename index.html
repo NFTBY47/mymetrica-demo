@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="format-detection" content="telephone=no">
+    <title>mymetrica</title>
+    <link rel="stylesheet" href="styles/styles.css" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+      (() => {
+        const tg = window.Telegram?.WebApp;
+        if (!tg) return;
+
+        const ua = navigator.userAgent || '';
+        const isRealTelegram =
+          /Telegram/i.test(ua) ||
+          (typeof tg.platform === 'string' && tg.platform !== 'unknown') ||
+          (typeof tg.initData === 'string' && tg.initData.length > 0) ||
+          Boolean(tg.initDataUnsafe?.user);
+        if (!isRealTelegram) return;
+
+        document.documentElement.classList.add('is-telegram');
+
+        const setVars = () => {
+          const raw = Number(tg.viewportHeight);
+          const h = Number.isFinite(raw) ? raw : 0;
+          const nextH = h >= 200 ? h : window.innerHeight;
+          document.documentElement.style.setProperty('--tg-viewport-height', `${nextH}px`);
+
+          const top = tg.safeAreaInset?.top;
+          const bottom = tg.safeAreaInset?.bottom;
+          const safeTop = typeof top === 'number' ? top : 0;
+          const safeBottom = typeof bottom === 'number' ? bottom : 0;
+          if (typeof top === 'number') document.documentElement.style.setProperty('--safe-top', `${safeTop}px`);
+          if (typeof bottom === 'number') document.documentElement.style.setProperty('--safe-bottom', `${safeBottom}px`);
+
+          const ct = tg.contentSafeAreaInset?.top;
+          const cr = tg.contentSafeAreaInset?.right;
+          const cb = tg.contentSafeAreaInset?.bottom;
+          const cl = tg.contentSafeAreaInset?.left;
+
+          const topInset = typeof ct === 'number' && ct > 0 ? ct : safeTop + 52;
+          const rightInset = typeof cr === 'number' && cr > 0 ? cr : 0;
+          const bottomInset = typeof cb === 'number' && cb > 0 ? cb : safeBottom;
+          const leftInset = typeof cl === 'number' && cl > 0 ? cl : 0;
+
+          document.documentElement.style.setProperty('--tg-content-top', `${topInset}px`);
+          document.documentElement.style.setProperty('--tg-content-right', `${rightInset}px`);
+          document.documentElement.style.setProperty('--tg-content-bottom', `${bottomInset}px`);
+          document.documentElement.style.setProperty('--tg-content-left', `${leftInset}px`);
+        };
+
+        const goFullscreen = () => {
+          try {
+            if (typeof tg.expand === 'function') tg.expand();
+
+            if (
+              typeof tg.requestFullscreen === 'function' &&
+              (typeof tg.isVersionAtLeast !== 'function' || tg.isVersionAtLeast('6.1'))
+            ) {
+              tg.requestFullscreen();
+            }
+          } catch {
+          }
+          setVars();
+        };
+
+        tg.ready?.();
+        goFullscreen();
+        setTimeout(goFullscreen, 0);
+        setTimeout(goFullscreen, 60);
+        setTimeout(goFullscreen, 300);
+
+        if (typeof tg.onEvent === 'function') {
+          tg.onEvent('viewportChanged', goFullscreen);
+        }
+      })();
+
+      // Fallback for non-Telegram environment
+      if (!window.Telegram?.WebApp) {
+        document.documentElement.style.setProperty('--safe-top', '0px');
+        document.documentElement.style.setProperty('--safe-bottom', '0px');
+        document.documentElement.style.setProperty('--tg-content-top', '52px');
+        document.documentElement.style.setProperty('--tg-content-right', '0px');
+        document.documentElement.style.setProperty('--tg-content-bottom', '0px');
+        document.documentElement.style.setProperty('--tg-content-left', '0px');
+        console.log('Index: Set fallback CSS vars');
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <section class="profile-hero" aria-label="Аккаунт">
+        <div class="profile-hero__bg"></div>
+        <div class="profile-hero__content">
+          <div class="avatar" role="img" aria-label="Аватар">
+            <svg class="avatar__icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 12a3.6 3.6 0 100-7.2 3.6 3.6 0 000 7.2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M5.5 20a6.5 6.5 0 0113 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="profile-hero__meta">
+            <div class="profile-hero__name" id="currentName">Пользователь</div>
+            <div class="profile-hero__hint">mymetrica</div>
+          </div>
+          <div class="profile-hero__actions">
+            <button class="round-btn" type="button" data-action="support" aria-label="Поддержка">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 12a8 8 0 0116 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6 12v4a2 2 0 01-2-2v-1a2 2 0 012-2zm12 0v4a2 2 0 002-2v-1a2 2 0 00-2-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="round-btn" type="button" data-action="notifications" aria-label="Уведомления">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M13.73 21a2 2 0 01-3.46 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <main class="content" aria-label="Главный экран">
+        <section class="calendar" aria-label="Календарь таблетницы">
+          <div class="calendar__row">
+            <div class="calendar__title">Таблетки</div>
+            <button class="calendar__link" type="button" data-action="pills">Открыть</button>
+          </div>
+          <div class="calendar__strip" id="calendarStrip" role="list" aria-label="Даты"></div>
+          <div class="pills" id="pillsSummary" aria-label="План приёма таблеток"></div>
+        </section>
+
+        <section class="menu" aria-label="Функции">
+          <button class="menu-item" type="button" data-action="decode">
+            <span class="menu-item__icon" aria-hidden="true">
+              <svg class="tile__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3h8l4 4v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>
+                <path d="M16 3v5h5"/>
+                <path d="M9 13h6"/>
+                <path d="M9 17h6"/>
+                <path d="M12 9h.01"/>
+              </svg>
+            </span>
+            <span class="menu-item__label">Расшифровка анализов</span>
+            <span class="menu-item__chev" aria-hidden="true">›</span>
+          </button>
+
+          <button class="menu-item" type="button" data-action="medcard">
+            <span class="menu-item__icon" aria-hidden="true">
+              <svg class="tile__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="8" y="2" width="8" height="4" rx="1"/>
+                <path d="M9 4H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/>
+                <path d="M10 10h4"/>
+                <path d="M10 14h6"/>
+                <path d="M10 18h5"/>
+              </svg>
+            </span>
+            <span class="menu-item__label">Медкарта</span>
+            <span class="menu-item__chev" aria-hidden="true">›</span>
+          </button>
+
+          <button class="menu-item" type="button" data-action="invite">
+            <span class="menu-item__icon" aria-hidden="true">
+              <svg class="tile__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="9" cy="7" r="3"/>
+                <path d="M19 8v6"/>
+                <path d="M16 11h6"/>
+              </svg>
+            </span>
+            <span class="menu-item__label">Семья</span>
+            <span class="menu-item__chev" aria-hidden="true">›</span>
+          </button>
+
+          <button class="menu-item" type="button" data-action="subscription">
+            <span class="menu-item__icon" aria-hidden="true">
+              <svg class="tile__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 7H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                <path d="M2 11h20"/>
+                <path d="M6 15h6"/>
+              </svg>
+            </span>
+            <span class="menu-item__label">Подписка</span>
+            <span class="menu-item__chev" aria-hidden="true">›</span>
+          </button>
+        </section>
+
+        <div class="spacer" aria-hidden="true"></div>
+      </main>
+
+      <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+      
+    </div>
+
+    <script src="scripts/app.js"></script>
+    <script>
+      (() => {
+        if (window.__mymetricaMainReady) return;
+
+        const fallbackToast = (msg) => {
+          const el = document.getElementById('toast');
+          if (!el) return;
+          el.textContent = msg;
+          el.classList.add('is-visible');
+          clearTimeout(el.__t);
+          el.__t = setTimeout(() => el.classList.remove('is-visible'), 2200);
+        };
+
+        const applyUserName = () => {
+          const nameEl = document.getElementById('currentName');
+          const avatarEl = document.querySelector('.avatar');
+          if (!nameEl) return;
+
+          try {
+            const tg = window.Telegram?.WebApp;
+            const user = tg?.initDataUnsafe?.user;
+            
+            // Always use Telegram name if available
+            if (user?.first_name) {
+              nameEl.textContent = user.first_name;
+            }
+            
+            // Always use Telegram avatar if available
+            if (user?.photo_url && avatarEl) {
+              const img = document.createElement('img');
+              img.src = user.photo_url;
+              img.alt = user.first_name || 'Аватар';
+              img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+              avatarEl.innerHTML = '';
+              avatarEl.appendChild(img);
+            }
+          } catch {
+          }
+        };
+
+        // Initialize
+        applyUserName();
+
+        // Initialize header functionality
+        if (typeof initHeader === 'function') {
+          initHeader();
+        }
+
+        // Telegram setup
+        const tg = window.Telegram?.WebApp;
+        if (typeof tg.setHeaderColor === 'function') {
+          tg.setHeaderColor('#eef2f6');
+        }
+        if (typeof tg.setBackgroundColor === 'function') {
+          tg.setBackgroundColor('#e2e6ed');
+        }
+        if (typeof tg.BackButton === 'object') {
+          tg.BackButton.show();
+          tg.BackButton.onClick(() => {
+            window.location.href = 'index.html';
+          });
+        }
+
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+          });
+        } else {
+          setupEventListeners();
+        }
+
+        function setupEventListeners() {
+          // Event listeners
+          document.addEventListener('click', (e) => {
+            const target = e.target?.closest?.('[data-action]');
+            if (!target) return;
+
+            const action = target.dataset.action;
+            
+            switch (action) {
+              case 'decode':
+                window.location.href = 'decode.html';
+                break;
+              case 'medcard':
+                window.location.href = 'medcard.html';
+                break;
+              case 'pills':
+                window.location.href = 'pills.html';
+                break;
+              case 'notifications':
+                fallbackToast('Уведомления: скоро');
+                break;
+              case 'invite':
+                window.location.href = 'family.html';
+                break;
+              case 'subscription':
+                fallbackToast('Подписка: скоро');
+                break;
+              default:
+                break;
+            }
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

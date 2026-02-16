@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Подписка — mymetrica</title>
+    <link rel="stylesheet" href="styles/styles.css" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+      (() => {
+        const tg = window.Telegram?.WebApp;
+        if (!tg) return;
+
+        const ua = navigator.userAgent || '';
+        const isRealTelegram =
+          /Telegram/i.test(ua) ||
+          (typeof tg.platform === 'string' && tg.platform !== 'unknown') ||
+          (typeof tg.initData === 'string' && tg.initData.length > 0) ||
+          Boolean(tg.initDataUnsafe?.user);
+        if (!isRealTelegram) return;
+
+        document.documentElement.classList.add('is-telegram');
+
+        const setVars = () => {
+          const raw = Number(tg.viewportHeight);
+          const h = Number.isFinite(raw) ? raw : 0;
+          const nextH = h >= 200 ? h : window.innerHeight;
+          document.documentElement.style.setProperty('--tg-viewport-height', `${nextH}px`);
+
+          const top = tg.safeAreaInset?.top;
+          const bottom = tg.safeAreaInset?.bottom;
+          const safeTop = typeof top === 'number' ? top : 0;
+          const safeBottom = typeof bottom === 'number' ? bottom : 0;
+          if (typeof top === 'number') document.documentElement.style.setProperty('--safe-top', `${safeTop}px`);
+          if (typeof bottom === 'number') document.documentElement.style.setProperty('--safe-bottom', `${safeBottom}px`);
+
+          const ct = tg.contentSafeAreaInset?.top;
+          const cr = tg.contentSafeAreaInset?.right;
+          const cb = tg.contentSafeAreaInset?.bottom;
+          const cl = tg.contentSafeAreaInset?.left;
+
+          const topInset = typeof ct === 'number' && ct > 0 ? ct : safeTop + 52;
+          const rightInset = typeof cr === 'number' && cr > 0 ? cr : 0;
+          const bottomInset = typeof cb === 'number' && cb > 0 ? cb : safeBottom;
+          const leftInset = typeof cl === 'number' && cl > 0 ? cl : 0;
+
+          document.documentElement.style.setProperty('--tg-content-top', `${topInset}px`);
+          document.documentElement.style.setProperty('--tg-content-right', `${rightInset}px`);
+          document.documentElement.style.setProperty('--tg-content-bottom', `${bottomInset}px`);
+          document.documentElement.style.setProperty('--tg-content-left', `${leftInset}px`);
+        };
+
+        const goFullscreen = () => {
+          try {
+            if (typeof tg.expand === 'function') tg.expand();
+
+            if (
+              typeof tg.requestFullscreen === 'function' &&
+              (typeof tg.isVersionAtLeast !== 'function' || tg.isVersionAtLeast('6.1'))
+            ) {
+              tg.requestFullscreen();
+            }
+          } catch {
+          }
+          setVars();
+        };
+
+        tg.ready?.();
+        goFullscreen();
+        setTimeout(goFullscreen, 0);
+        setTimeout(goFullscreen, 60);
+        setTimeout(goFullscreen, 300);
+
+        if (typeof tg.onEvent === 'function') {
+          tg.onEvent('viewportChanged', goFullscreen);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <header class="page-top" aria-label="Верхняя панель">
+        <div class="page-top__title">
+          <div class="page-top__name">Подписка</div>
+          <div class="page-top__sub">Тарифы и доступ к функциям</div>
+        </div>
+        <div class="page-top__spacer" aria-hidden="true"></div>
+      </header>
+
+      <main class="content" aria-label="Экран подписки">
+        <section class="glass-card" aria-label="Раздел подписки">
+          <div class="glass-card__title">Скоро</div>
+          <div style="margin-top: 8px; font-weight: 700; line-height: 1.4; color: var(--muted);">Этот раздел в разработке.</div>
+        </section>
+
+        <div class="spacer" aria-hidden="true"></div>
+      </main>
+
+      <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    </div>
+
+    <script>
+      if (window.Telegram?.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+          window.location.href = 'index.html';
+        });
+        try {
+          tg.setBackgroundColor?.('#e2e6ed');
+          tg.setHeaderColor?.('#eef2f6');
+        } catch {
+        }
+      }
+    </script>
+  </body>
+</html>

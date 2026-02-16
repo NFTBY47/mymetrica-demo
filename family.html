@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Семья — mymetrica</title>
+    <link rel="stylesheet" href="styles/styles.css" />
+    <style>
+      .family-members {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .family-member {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+      }
+
+      .family-member:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+      }
+
+      .family-member__avatar {
+        flex-shrink: 0;
+      }
+
+      .family-member__info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .family-member__name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 4px;
+      }
+
+      .family-member__role {
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .family-member__qr-btn {
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        border: none;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: var(--text);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+
+      .family-member__qr-btn:hover {
+        background: var(--accent);
+        color: white;
+        transform: scale(1.05);
+      }
+
+      .family-member__qr-btn:active {
+        transform: scale(0.95);
+      }
+
+      .qr-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .qr-modal.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .qr-modal__backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+      }
+
+      .qr-modal__content {
+        position: relative;
+        background: var(--bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 24px;
+        max-width: 320px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        transform: scale(0.9) translateY(20px);
+        transition: all 0.3s ease;
+      }
+
+      .qr-modal.show .qr-modal__content {
+        transform: scale(1) translateY(0);
+      }
+
+      .qr-modal__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+      }
+
+      .qr-modal__title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .qr-modal__close {
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: var(--muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+
+      .qr-modal__close:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: var(--text);
+      }
+
+      .qr-modal__body {
+        text-align: center;
+      }
+
+      .qr-code-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 24px;
+      }
+
+      .qr-code {
+        width: 200px;
+        height: 200px;
+        background: white;
+        border-radius: 16px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .qr-code::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        background: repeating-conic-gradient(#000 0deg 90deg, #fff 90deg 180deg);
+        border-radius: 8px;
+        opacity: 0.1;
+      }
+
+      .qr-code::after {
+        content: 'QR';
+        position: absolute;
+        font-size: 24px;
+        font-weight: bold;
+        color: #000;
+        opacity: 0.3;
+      }
+
+      .qr-modal__user-name {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+
+      .qr-modal__description {
+        font-size: 14px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+
+      .qr-code-large {
+        width: 250px;
+        height: 250px;
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
+
+      .qr-code-large__content {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      .qr-code-large__content img {
+        border-radius: 12px;
+      }
+
+      .qr-code-large__content canvas {
+        border-radius: 12px;
+      }
+
+      .qr-glass-card {
+        background: 
+          linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.25) 0%, 
+            rgba(255, 255, 255, 0.1) 100%),
+          linear-gradient(135deg, 
+            rgba(52, 199, 89, 0.05) 0%, 
+            rgba(0, 122, 255, 0.05) 100%);
+        border: 1px solid 
+          rgba(255, 255, 255, 0.2),
+          rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 32px;
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        box-shadow: 
+          0 20px 60px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .qr-glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, 
+          transparent, 
+          rgba(255, 255, 255, 0.4), 
+          transparent);
+      }
+
+      .qr-glass-card__header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .qr-glass-card__avatar {
+        flex-shrink: 0;
+      }
+
+      .qr-glass-card__info {
+        flex: 1;
+        text-align: left;
+      }
+
+      .qr-glass-card__name {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 4px;
+      }
+
+      .qr-glass-card__status {
+        font-size: 14px;
+        color: var(--muted);
+        font-weight: 500;
+      }
+
+      .qr-glass-card__code {
+        margin: 24px 0;
+        display: flex;
+        justify-content: center;
+      }
+
+      .qr-glass-card__actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .glass-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 20px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .glass-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+          rgba(255, 255, 255, 0.1) 0%, 
+          rgba(255, 255, 255, 0.05) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .glass-btn:hover::before {
+        opacity: 1;
+      }
+
+      .glass-btn--primary {
+        background: 
+          linear-gradient(135deg, 
+            rgba(0, 122, 255, 0.8) 0%, 
+            rgba(0, 122, 255, 0.6) 100%);
+        color: white;
+        box-shadow: 
+          0 8px 20px rgba(0, 122, 255, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      }
+
+      .glass-btn--primary:hover {
+        background: 
+          linear-gradient(135deg, 
+            rgba(0, 122, 255, 0.9) 0%, 
+            rgba(0, 122, 255, 0.7) 100%);
+        transform: translateY(-2px);
+        box-shadow: 
+          0 12px 30px rgba(0, 122, 255, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      }
+
+      .glass-btn--secondary {
+        background: 
+          linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.25) 0%, 
+            rgba(255, 255, 255, 0.15) 100%);
+        color: var(--text);
+        box-shadow: 
+          0 8px 20px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      }
+
+      .glass-btn--secondary:hover {
+        background: 
+          linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.35) 0%, 
+            rgba(255, 255, 255, 0.25) 100%);
+        transform: translateY(-2px);
+        box-shadow: 
+          0 12px 30px rgba(0, 0, 0, 0.15),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      }
+
+      .glass-btn:active {
+        transform: translateY(0);
+      }
+
+      .glass-btn svg {
+        flex-shrink: 0;
+      }
+
+      .share-qr-btn:hover {
+        background: #0056cc;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 122, 255, 0.3);
+      }
+
+      .share-qr-btn:active {
+        transform: translateY(0);
+      }
+
+      @media (max-width: 480px) {
+        .qr-modal__content {
+          width: 95%;
+          padding: 20px;
+        }
+
+        .qr-code {
+          width: 180px;
+          height: 180px;
+        }
+
+        .qr-code-large {
+          width: 200px;
+          height: 200px;
+          padding: 12px;
+        }
+
+        .qr-glass-card {
+          padding: 24px;
+        }
+
+        .qr-glass-card__actions {
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .glass-btn {
+          padding: 12px 16px;
+          font-size: 14px;
+        }
+
+        .family-member {
+          padding: 12px;
+        }
+
+        .family-member__qr-btn {
+          width: 40px;
+          height: 40px;
+        }
+      }
+    </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="scripts/app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+      (() => {
+        const tg = window.Telegram?.WebApp;
+        if (!tg) return;
+
+        const ua = navigator.userAgent || '';
+        const isRealTelegram =
+          /Telegram/i.test(ua) ||
+          (typeof tg.platform === 'string' && tg.platform !== 'unknown') ||
+          (typeof tg.initData === 'string' && tg.initData.length > 0) ||
+          Boolean(tg.initDataUnsafe?.user);
+        if (!isRealTelegram) return;
+
+        document.documentElement.classList.add('is-telegram');
+
+        const setVars = () => {
+          const raw = Number(tg.viewportHeight);
+          const h = Number.isFinite(raw) ? raw : 0;
+          const nextH = h >= 200 ? h : window.innerHeight;
+          document.documentElement.style.setProperty('--tg-viewport-height', `${nextH}px`);
+
+          const top = tg.safeAreaInset?.top;
+          const bottom = tg.safeAreaInset?.bottom;
+          const safeTop = typeof top === 'number' ? top : 0;
+          const safeBottom = typeof bottom === 'number' ? bottom : 0;
+          if (typeof top === 'number') document.documentElement.style.setProperty('--safe-top', `${safeTop}px`);
+          if (typeof bottom === 'number') document.documentElement.style.setProperty('--safe-bottom', `${safeBottom}px`);
+
+          const ct = tg.contentSafeAreaInset?.top;
+          const cr = tg.contentSafeAreaInset?.right;
+          const cb = tg.contentSafeAreaInset?.bottom;
+          const cl = tg.contentSafeAreaInset?.left;
+
+          const topInset = typeof ct === 'number' && ct > 0 ? ct : safeTop + 52;
+          const rightInset = typeof cr === 'number' && cr > 0 ? cr : 0;
+          const bottomInset = typeof cb === 'number' && cb > 0 ? cb : safeBottom;
+          const leftInset = typeof cl === 'number' && cl > 0 ? cl : 0;
+
+          document.documentElement.style.setProperty('--tg-content-top', `${topInset}px`);
+          document.documentElement.style.setProperty('--tg-content-right', `${rightInset}px`);
+          document.documentElement.style.setProperty('--tg-content-bottom', `${bottomInset}px`);
+          document.documentElement.style.setProperty('--tg-content-left', `${leftInset}px`);
+        };
+
+        const goFullscreen = () => {
+          try {
+            if (typeof tg.expand === 'function') tg.expand();
+
+            if (
+              typeof tg.requestFullscreen === 'function' &&
+              (typeof tg.isVersionAtLeast !== 'function' || tg.isVersionAtLeast('6.1'))
+            ) {
+              tg.requestFullscreen();
+            }
+          } catch {
+          }
+          setVars();
+        };
+
+        tg.ready?.();
+        goFullscreen();
+        setTimeout(goFullscreen, 0);
+        setTimeout(goFullscreen, 60);
+        setTimeout(goFullscreen, 300);
+
+        if (typeof tg.onEvent === 'function') {
+          tg.onEvent('viewportChanged', goFullscreen);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <section class="profile-hero" aria-label="Аккаунт">
+        <div class="profile-hero__bg"></div>
+        <div class="profile-hero__content">
+          <div class="avatar" role="img" aria-label="Аватар">
+            <svg class="avatar__icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 12a3.6 3.6 0 100-7.2 3.6 3.6 0 000 7.2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M5.5 20a6.5 6.5 0 0113 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="profile-hero__meta">
+            <div class="profile-hero__name" id="currentName">Пользователь</div>
+            <div class="profile-hero__hint">Семья</div>
+          </div>
+          <div class="profile-hero__actions">
+            <button class="round-btn" type="button" data-action="support" aria-label="Поддержка">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 12a8 8 0 0116 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6 12v4a2 2 0 01-2-2v-1a2 2 0 012-2zm12 0v4a2 2 0 002-2v-1a2 2 0 00-2-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="round-btn" type="button" data-action="notifications" aria-label="Уведомления">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M13.73 21a2 2 0 01-3.46 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <main class="content" aria-label="Экран семьи">
+        <section class="menu" aria-label="Члены семьи">
+          <div class="glass-card" style="margin: 16px; margin-bottom: 0;">
+            <div class="glass-card__title">Ваш QR-код</div>
+            <div class="muted" style="margin-top: 8px; font-weight: 700; line-height: 1.4;">Поделитесь этим QR-кодом для добавления в семейный профиль</div>
+          
+          <div class="personal-qr-container" style="margin-top: 32px; text-align: center;">
+            <div class="qr-glass-card">
+              <div class="qr-glass-card__header">
+                <div class="qr-glass-card__avatar">
+                  <div class="avatar" style="width: 60px; height: 60px;">
+                    <svg class="avatar__icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 12a3.6 3.6 0 100-7.2 3.6 3.6 0 000 7.2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M5.5 20a6.5 6.5 0 0113 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="qr-glass-card__info">
+                  <div class="qr-glass-card__name" id="personalQRName">Ваш профиль</div>
+                  <div class="qr-glass-card__status">Готов к сканированию</div>
+                </div>
+              </div>
+              
+              <div class="qr-glass-card__code">
+                <div class="qr-code-large">
+                  <div class="qr-code-large__content" id="qrCodeContent">
+                    <!-- QR code will be generated here -->
+                  </div>
+                </div>
+              </div>
+              
+              <div class="qr-glass-card__actions">
+                <button class="glass-btn glass-btn--primary" onclick="shareQRCode()">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M16 6l-4-4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 2v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>Поделиться</span>
+                </button>
+                
+                <button class="glass-btn glass-btn--secondary" onclick="scanQRCode()">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="2"/>
+                    <rect x="13" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="2"/>
+                    <rect x="3" y="13" width="8" height="8" rx="1" stroke="currentColor" stroke-width="2"/>
+                    <rect x="17" y="17" width="4" height="4" rx="1" fill="currentColor"/>
+                  </svg>
+                  <span>Сканировать</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- QR Code Modal -->
+      <div class="qr-modal" id="qrModal">
+        <div class="qr-modal__backdrop" onclick="closeQR()"></div>
+        <div class="qr-modal__content">
+          <div class="qr-modal__header">
+            <div class="qr-modal__title">QR-код для добавления в профиль</div>
+            <button class="qr-modal__close" onclick="closeQR()">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="qr-modal__body">
+            <div class="qr-code-container">
+              <div class="qr-code" id="qrCode">
+                <!-- QR code will be generated here -->
+              </div>
+            </div>
+            <div class="qr-modal__info">
+              <div class="qr-modal__user-name" id="qrUserName">Имя пользователя</div>
+              <div class="qr-modal__description">Отсканируйте QR-код для добавления этого пользователя в семейный профиль</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    </div>
+
+    <script>
+      // Personal QR Code functionality
+      function generatePersonalQR() {
+        const qrContent = document.getElementById('qrCodeContent');
+        const userNameEl = document.getElementById('personalQRName');
+        const avatarEl = document.querySelector('.qr-glass-card__avatar .avatar');
+        
+        // Get user data from Telegram
+        const tg = window.Telegram?.WebApp;
+        const user = tg?.initDataUnsafe?.user;
+        const userName = user?.first_name || 'Пользователь';
+        const userId = user?.id || 'unknown';
+        
+        // Update user name
+        userNameEl.textContent = userName;
+        
+        // Update user avatar
+        if (user?.photo_url && avatarEl) {
+          const img = document.createElement('img');
+          img.src = user.photo_url;
+          img.alt = userName;
+          img.style.cssText = 'width: 100%; height: 100%; object-fit: cover; border-radius: 50%;';
+          img.onerror = () => {
+            console.log('Failed to load user avatar in QR card, keeping default');
+          };
+          img.onload = () => {
+            console.log('User avatar loaded successfully in QR card');
+          };
+          avatarEl.innerHTML = '';
+          avatarEl.appendChild(img);
+        }
+        
+        // Clear previous QR code
+        qrContent.innerHTML = '';
+        
+        // Generate real QR code
+        const qrData = `mymetrica://family/add/${userId}`;
+        try {
+          new QRCode(qrContent, {
+            text: qrData,
+            width: 200,
+            height: 200,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+          });
+        } catch (error) {
+          console.error('Error generating QR code:', error);
+          // Fallback to placeholder
+          qrContent.innerHTML = `
+            <div style="font-size: 10px; color: #000; opacity: 0.4; text-align: center; padding: 10px;">
+              ${qrData}
+            </div>
+          `;
+        }
+      }
+      
+      function shareQRCode() {
+        const tg = window.Telegram?.WebApp;
+        const user = tg?.initDataUnsafe?.user;
+        const userId = user?.id || 'unknown';
+        const userName = user?.first_name || 'Пользователь';
+        
+        const shareText = `Добавьте меня в семейный профиль mymetrica!\n\nИмя: ${userName}\nQR-код: mymetrica://family/add/${userId}`;
+        
+        if (tg?.shareText) {
+          tg.shareText(shareText);
+        } else if (tg?.openTelegramLink) {
+          tg.openTelegramLink(`https://t.me/share/url?url=mymetrica://family/add/${userId}&text=${encodeURIComponent(shareText)}`);
+        } else {
+          // Fallback - copy to clipboard
+          navigator.clipboard.writeText(shareText).then(() => {
+            alert('Ссылка скопирована в буфер обмена!');
+          }).catch(() => {
+            alert('Ошибка копирования ссылки');
+          });
+        }
+      }
+      
+      function scanQRCode() {
+        const tg = window.Telegram?.WebApp;
+        
+        // Show scan QR functionality
+        if (tg?.showScanQR) {
+          tg.showScanQR();
+        } else {
+          // Fallback - open camera or show instructions
+          alert('Сканирование QR-кода доступно в Telegram. Нажмите на QR-код другого пользователя и выберите "Сканировать".');
+        }
+      }
+      
+      function closeQR() {
+        const modal = document.getElementById('qrModal');
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+      
+      // Close modal on backdrop click
+      document.getElementById('qrModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeQR();
+        }
+      });
+      
+      // Close modal on Escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeQR();
+        }
+      });
+
+      // Initialize personal QR code
+      generatePersonalQR();
+
+      // Initialize header functionality
+      if (typeof initHeader === 'function') {
+        initHeader();
+      }
+
+      // Telegram WebApp setup
+      if (window.Telegram?.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+          window.location.href = 'index.html';
+        });
+        try {
+          tg.setBackgroundColor?.('#e2e6ed');
+          tg.setHeaderColor?.('#eef2f6');
+        } catch {
+        }
+      }
+    </script>
+  </body>
+</html>

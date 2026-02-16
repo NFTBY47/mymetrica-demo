@@ -1,2 +1,1 @@
-# mymetrica-demo
-demo version
+# mymetrica

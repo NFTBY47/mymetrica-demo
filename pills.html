@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Таблетница — mymetrica</title>
+    <link rel="stylesheet" href="styles/styles.css" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+      (() => {
+        const tg = window.Telegram?.WebApp;
+        if (!tg) return;
+
+        const ua = navigator.userAgent || '';
+        const isRealTelegram =
+          /Telegram/i.test(ua) ||
+          (typeof tg.platform === 'string' && tg.platform !== 'unknown') ||
+          (typeof tg.initData === 'string' && tg.initData.length > 0) ||
+          Boolean(tg.initDataUnsafe?.user);
+        if (!isRealTelegram) return;
+
+        document.documentElement.classList.add('is-telegram');
+
+        const setVars = () => {
+          const raw = Number(tg.viewportHeight);
+          const h = Number.isFinite(raw) ? raw : 0;
+          const nextH = h >= 200 ? h : window.innerHeight;
+          document.documentElement.style.setProperty('--tg-viewport-height', `${nextH}px`);
+
+          const top = tg.safeAreaInset?.top;
+          const bottom = tg.safeAreaInset?.bottom;
+          const safeTop = typeof top === 'number' ? top : 0;
+          const safeBottom = typeof bottom === 'number' ? bottom : 0;
+          if (typeof top === 'number') document.documentElement.style.setProperty('--safe-top', `${safeTop}px`);
+          if (typeof bottom === 'number') document.documentElement.style.setProperty('--safe-bottom', `${safeBottom}px`);
+
+          const ct = tg.contentSafeAreaInset?.top;
+          const cr = tg.contentSafeAreaInset?.right;
+          const cb = tg.contentSafeAreaInset?.bottom;
+          const cl = tg.contentSafeAreaInset?.left;
+
+          const topInset = typeof ct === 'number' && ct > 0 ? ct : safeTop + 52;
+          const rightInset = typeof cr === 'number' && cr > 0 ? cr : 0;
+          const bottomInset = typeof cb === 'number' && cb > 0 ? cb : safeBottom;
+          const leftInset = typeof cl === 'number' && cl > 0 ? cl : 0;
+
+          document.documentElement.style.setProperty('--tg-content-top', `${topInset}px`);
+          document.documentElement.style.setProperty('--tg-content-right', `${rightInset}px`);
+          document.documentElement.style.setProperty('--tg-content-bottom', `${bottomInset}px`);
+          document.documentElement.style.setProperty('--tg-content-left', `${leftInset}px`);
+        };
+
+        const goFullscreen = () => {
+          try {
+            if (typeof tg.expand === 'function') tg.expand();
+
+            if (
+              typeof tg.requestFullscreen === 'function' &&
+              (typeof tg.isVersionAtLeast !== 'function' || tg.isVersionAtLeast('6.1'))
+            ) {
+              tg.requestFullscreen();
+            }
+          } catch {
+          }
+          setVars();
+        };
+
+        tg.ready?.();
+        goFullscreen();
+        setTimeout(goFullscreen, 0);
+        setTimeout(goFullscreen, 60);
+        setTimeout(goFullscreen, 300);
+
+        if (typeof tg.onEvent === 'function') {
+          tg.onEvent('viewportChanged', goFullscreen);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <header class="page-top" aria-label="Верхняя панель">
+        <div class="page-top__title">
+          <div class="page-top__name">Таблетница</div>
+          <div class="page-top__sub" id="pillsDateLabel"></div>
+        </div>
+        <div class="page-top__spacer" aria-hidden="true"></div>
+      </header>
+
+      <main class="content" aria-label="Экран таблетницы">
+        <section class="glass-card" aria-label="Календарь">
+          <div class="day-switch" role="tablist" aria-label="Выбор дня">
+            <button class="seg-btn is-active" type="button" id="tabToday" role="tab" aria-selected="true">Сегодня</button>
+            <button class="seg-btn" type="button" id="tabTomorrow" role="tab" aria-selected="false">Завтра</button>
+            <button class="seg-btn" type="button" id="tabDate" role="tab" aria-selected="false">Дата</button>
+          </div>
+          <div class="calendar__strip" id="calendarStrip" role="list" aria-label="Даты" style="margin-top: 16px; padding: 0;"></div>
+        </section>
+
+        <section class="glass-card" aria-label="Расписание на день">
+          <div class="glass-card__head">
+            <div class="glass-card__title">Приёмы</div>
+            <button class="add-btn" type="button" id="openAdd" aria-label="Добавить">+ Добавить</button>
+          </div>
+          <div class="pills-empty" id="pillsEmpty">Пока нет приёмов на этот день</div>
+          <div class="pills-list" id="pillsList" aria-label="Список таблеток"></div>
+        </section>
+
+        <div class="spacer" aria-hidden="true"></div>
+      </main>
+
+      <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    </div>
+
+    <div class="sheet" id="dateSheet" aria-hidden="true">
+      <div class="sheet__backdrop" id="dateSheetBackdrop" aria-hidden="true"></div>
+      <div class="sheet__panel" role="dialog" aria-modal="true" aria-label="Выбор даты">
+        <div class="sheet__grab" aria-hidden="true"></div>
+        <div class="sheet__head">
+          <div class="sheet__title" id="monthTitle"></div>
+          <div class="sheet__quick">
+            <button class="link-btn" type="button" id="quickToday">Сегодня</button>
+            <button class="link-btn" type="button" id="quickTomorrow">Завтра</button>
+          </div>
+          <button class="sheet__nav" type="button" id="dateSheetClose" aria-label="Закрыть">×</button>
+        </div>
+
+        <div class="month-grid">
+          <div class="month-grid__dow">пн</div>
+          <div class="month-grid__dow">вт</div>
+          <div class="month-grid__dow">ср</div>
+          <div class="month-grid__dow">чт</div>
+          <div class="month-grid__dow">пт</div>
+          <div class="month-grid__dow">сб</div>
+          <div class="month-grid__dow">вс</div>
+          <div class="month-grid__days" id="monthDays" role="grid"></div>
+        </div>
+
+        <button class="primary-btn" type="button" id="dateSheetDone">Готово</button>
+      </div>
+    </div>
+
+    <!-- Delete Sheet -->
+    <div class="sheet" id="deleteSheet" aria-hidden="true">
+      <div class="sheet__backdrop" id="deleteSheetBackdrop" aria-hidden="true"></div>
+      <div class="sheet__panel" role="dialog" aria-modal="true" aria-label="Удаление">
+        <div class="sheet__grab" aria-hidden="true"></div>
+        <div class="sheet__head">
+          <div class="sheet__title">Удаление</div>
+        </div>
+        <div class="action-list">
+          <button class="action-row" type="button" id="deleteDayBtn">Удалить только на этот день</button>
+          <button class="action-row" type="button" id="deleteAllBtn" style="color: #ef4444;">Удалить весь курс</button>
+          <button class="action-row" type="button" id="deleteCancelBtn">Отмена</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet" id="addSheet" aria-hidden="true">
+      <div class="sheet__backdrop" id="addSheetBackdrop" aria-hidden="true"></div>
+      <div class="sheet__panel" role="dialog" aria-modal="true" aria-label="Добавить приём">
+        <div class="sheet__grab" aria-hidden="true"></div>
+        <div class="sheet__head">
+          <div class="sheet__title">Добавить приём</div>
+          <button class="sheet__nav" type="button" id="addClose" aria-label="Закрыть">×</button>
+        </div>
+
+        <form class="pills-form" id="pillsForm">
+          <button class="date-field" type="button" id="openDatePicker" aria-label="Выбор даты">
+            <span class="date-field__label">Дата</span>
+            <span class="date-field__value" id="selectedDateLabel"></span>
+            <span class="date-field__chev" aria-hidden="true">›</span>
+          </button>
+
+          <button class="date-field" type="button" id="openRepeat" aria-label="Повтор">
+            <span class="date-field__label">Повтор</span>
+            <span class="date-field__value" id="repeatLabel"></span>
+            <span class="date-field__chev" aria-hidden="true">›</span>
+          </button>
+
+          <label class="field">
+            <span class="field__label">Название</span>
+            <input class="field__input" id="pillName" name="name" type="text" placeholder="Например: Витамин D3" autocomplete="off" required />
+          </label>
+
+          <div class="pills-form__row">
+            <label class="field">
+              <span class="field__label">Дозировка</span>
+              <input class="field__input" id="pillMeta" name="meta" type="text" placeholder="1 капсула" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span class="field__label">Время</span>
+              <div class="times" id="timesWrap" aria-label="Время приёма"></div>
+            </label>
+          </div>
+
+          <button class="primary-btn" type="submit" id="addPillBtn">Сохранить</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="sheet" id="repeatSheet" aria-hidden="true">
+      <div class="sheet__backdrop" id="repeatSheetBackdrop" aria-hidden="true"></div>
+      <div class="sheet__panel" role="dialog" aria-modal="true" aria-label="Повтор">
+        <div class="sheet__grab" aria-hidden="true"></div>
+        <div class="sheet__head">
+          <button class="sheet__nav" type="button" id="repeatBack" aria-label="Назад" hidden>‹</button>
+          <div class="sheet__title" id="repeatTitle">Как часто вы его принимаете?</div>
+          <button class="sheet__nav" type="button" id="repeatClose" aria-label="Закрыть">×</button>
+        </div>
+
+        <div class="sheet-steps" id="repeatSteps">
+          <div class="step" id="repeatStepList">
+            <div class="action-list" role="list">
+              <button class="action-row" type="button" data-repeat="daily" role="listitem">Каждый день</button>
+              <button class="action-row" type="button" data-repeat="every_other" role="listitem">Через день</button>
+              <button class="action-row" type="button" data-repeat="weekdays" role="listitem">По будням</button>
+              <button class="action-row" type="button" data-repeat="weekly" role="listitem">Раз в неделю</button>
+              <button class="action-row" type="button" data-repeat="interval_days" role="listitem">Каждые X дней</button>
+              <button class="action-row" type="button" data-repeat="interval_weeks" role="listitem">Каждые X недель</button>
+              <button class="action-row" type="button" data-repeat="interval_months" role="listitem">Каждые X месяцев</button>
+              <button class="action-row" type="button" data-repeat="once" role="listitem">Только по необходимости</button>
+            </div>
+          </div>
+
+          <div class="step" id="repeatStepInterval" hidden>
+            <div class="picker-title" id="intervalTitle">Установить интервал</div>
+            <div class="num-picker" id="intervalPicker" aria-label="Интервал"></div>
+            <button class="primary-btn" type="button" id="repeatNext">Далее</button>
+          </div>
+
+          <div class="step" id="repeatStepTimes" hidden>
+            <div class="picker-title">Сколько раз в день?</div>
+            <div class="action-list" role="list">
+              <button class="action-row" type="button" data-times="1" role="listitem">Один раз в день</button>
+              <button class="action-row" type="button" data-times="2" role="listitem">Два раза в день</button>
+              <button class="action-row" type="button" data-times="3" role="listitem">3 раза в день</button>
+              <button class="action-row" type="button" data-times="4" role="listitem">Более 3 раз в день</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet" id="timeSheet" aria-hidden="true">
+      <div class="sheet__backdrop" id="timeSheetBackdrop" aria-hidden="true"></div>
+      <div class="sheet__panel" role="dialog" aria-modal="true" aria-label="Время">
+        <div class="sheet__grab" aria-hidden="true"></div>
+        <div class="sheet__head">
+          <div class="sheet__title">Время</div>
+          <button class="sheet__nav" type="button" id="timeSheetClose" aria-label="Закрыть">×</button>
+        </div>
+
+        <div class="time-picker" aria-label="Выбор времени">
+          <div class="time-picker__col" id="timeHours" aria-label="Часы"></div>
+          <div class="time-picker__sep" aria-hidden="true">:</div>
+          <div class="time-picker__col" id="timeMinutes" aria-label="Минуты"></div>
+        </div>
+
+        <button class="primary-btn" type="button" id="timeSheetDone">Готово</button>
+      </div>
+    </div>
+
+    <script src="scripts/pills.js"></script>
+  </body>
+</html>

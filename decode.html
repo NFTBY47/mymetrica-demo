@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="format-detection" content="telephone=no">
+    <title>Расшифровка — mymetrica</title>
+    <link rel="stylesheet" href="styles/styles.css" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+      (() => {
+        const tg = window.Telegram?.WebApp;
+        if (!tg) return;
+
+        const ua = navigator.userAgent || '';
+        const isRealTelegram =
+          /Telegram/i.test(ua) ||
+          (typeof tg.platform === 'string' && tg.platform !== 'unknown') ||
+          (typeof tg.initData === 'string' && tg.initData.length > 0) ||
+          Boolean(tg.initDataUnsafe?.user);
+        if (!isRealTelegram) return;
+
+        document.documentElement.classList.add('is-telegram');
+
+        const setVars = () => {
+          const raw = Number(tg.viewportHeight);
+          const h = Number.isFinite(raw) ? raw : 0;
+          const nextH = h >= 200 ? h : window.innerHeight;
+          document.documentElement.style.setProperty('--tg-viewport-height', `${nextH}px`);
+
+          const top = tg.safeAreaInset?.top;
+          const bottom = tg.safeAreaInset?.bottom;
+          const safeTop = typeof top === 'number' ? top : 0;
+          const safeBottom = typeof bottom === 'number' ? bottom : 0;
+          if (typeof top === 'number') document.documentElement.style.setProperty('--safe-top', `${safeTop}px`);
+          if (typeof bottom === 'number') document.documentElement.style.setProperty('--safe-bottom', `${safeBottom}px`);
+
+          const ct = tg.contentSafeAreaInset?.top;
+          const cr = tg.contentSafeAreaInset?.right;
+          const cb = tg.contentSafeAreaInset?.bottom;
+          const cl = tg.contentSafeAreaInset?.left;
+
+          const topInset = typeof ct === 'number' && ct > 0 ? ct : safeTop + 52;
+          const rightInset = typeof cr === 'number' && cr > 0 ? cr : 0;
+          const bottomInset = typeof cb === 'number' && cb > 0 ? cb : safeBottom;
+          const leftInset = typeof cl === 'number' && cl > 0 ? cl : 0;
+
+          document.documentElement.style.setProperty('--tg-content-top', `${topInset}px`);
+          document.documentElement.style.setProperty('--tg-content-right', `${rightInset}px`);
+          document.documentElement.style.setProperty('--tg-content-bottom', `${bottomInset}px`);
+          document.documentElement.style.setProperty('--tg-content-left', `${leftInset}px`);
+        };
+
+        const goFullscreen = () => {
+          try {
+            if (typeof tg.expand === 'function') tg.expand();
+
+            if (
+              typeof tg.requestFullscreen === 'function' &&
+              (typeof tg.isVersionAtLeast !== 'function' || tg.isVersionAtLeast('6.1'))
+            ) {
+              tg.requestFullscreen();
+            }
+          } catch {
+          }
+          setVars();
+        };
+
+        tg.ready?.();
+        goFullscreen();
+        setTimeout(goFullscreen, 0);
+        setTimeout(goFullscreen, 60);
+        setTimeout(goFullscreen, 300);
+
+        if (typeof tg.onEvent === 'function') {
+          tg.onEvent('viewportChanged', goFullscreen);
+        }
+
+        // Telegram BackButton setup - ВНУТРИ основного блока
+        if (typeof tg.BackButton === 'object') {
+          tg.BackButton.show();
+          tg.BackButton.onClick(() => {
+            window.location.href = 'index.html';
+          });
+        }
+        // Set colors for consistency
+        if (typeof tg.setHeaderColor === 'function') {
+          tg.setHeaderColor('#eef2f6');
+        }
+        if (typeof tg.setBackgroundColor === 'function') {
+          tg.setBackgroundColor('#e2e6ed');
+        }
+      })();
+
+      // Fallback for non-Telegram environment
+      if (!window.Telegram?.WebApp) {
+        document.documentElement.style.setProperty('--safe-top', '0px');
+        document.documentElement.style.setProperty('--safe-bottom', '0px');
+        document.documentElement.style.setProperty('--tg-content-top', '52px');
+        document.documentElement.style.setProperty('--tg-content-right', '0px');
+        document.documentElement.style.setProperty('--tg-content-bottom', '0px');
+        document.documentElement.style.setProperty('--tg-content-left', '0px');
+        console.log('Decode: Set fallback CSS vars');
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <section class="profile-hero" aria-label="Аккаунт">
+        <div class="profile-hero__bg"></div>
+        <div class="profile-hero__content">
+          <div class="avatar" role="img" aria-label="Аватар">
+            <svg class="avatar__icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 12a3.6 3.6 0 100-7.2 3.6 3.6 0 000 7.2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M5.5 20a6.5 6.5 0 0113 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="profile-hero__meta">
+            <div class="profile-hero__name" id="currentName">Пользователь</div>
+            <div class="profile-hero__hint">Расшифровка анализов</div>
+          </div>
+          <div class="profile-hero__actions">
+            <button class="round-btn" type="button" data-action="support" aria-label="Поддержка">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 12a8 8 0 0116 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6 12v4a2 2 0 01-2-2v-1a2 2 0 012-2zm12 0v4a2 2 0 002-2v-1a2 2 0 00-2-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="round-btn" type="button" data-action="notifications" aria-label="Уведомления">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M13.73 21a2 2 0 01-3.46 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <main class="content" aria-label="Экран расшифровки">
+        <div class="decode-empty">
+          <div class="ai-visual">
+            <div class="ai-visual__card">
+              <svg class="ai-visual__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M14 2v6h6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 13h2l1-2 2 4 1-2h2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 17H8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="ai-visual__scan"></div>
+            </div>
+          </div>
+          
+          <div class="decode-empty__content">
+            <div class="decode-empty__text">
+              Загрузите фото или PDF с результатами анализов, и я расшифрую их простым языком.
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <div class="quick-actions">
+        <div class="quick-actions__scroll">
+          <button class="quick-chip" data-question="about">Что такое mymetrica?</button>
+          <button class="quick-chip" data-question="howto">Как добавить анализ?</button>
+          <button class="quick-chip" data-question="security">Безопасность данных</button>
+        </div>
+      </div>
+
+      <div class="faq-chat" id="faqChat" style="display: none;">
+        <div class="faq-chat__messages" id="faqMessages"></div>
+      </div>
+
+      <div class="chat-bar">
+        <div class="chat-bar__inner">
+          <label class="attach-btn" aria-label="Прикрепить файл">
+            <input type="file" accept="image/*,application/pdf" hidden multiple />
+            <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true" style="color: #000000">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </label>
+          <input type="text" class="chat-bar__input" placeholder="Начните расшифровку..." />
+          <button class="decipher-btn">
+            <svg class="decipher-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c.71 0 1.4.08 2.06.24" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="scripts/app.js"></script>
+    <script>
+      (() => {
+        if (window.__mymetricaMainReady) return;
+
+        const fallbackToast = (msg) => {
+          const el = document.getElementById('toast');
+          if (!el) return;
+          el.textContent = msg;
+          el.classList.add('is-visible');
+          clearTimeout(el.__t);
+          el.__t = setTimeout(() => el.classList.remove('is-visible'), 2200);
+        };
+
+        // Initialize
+        applyUserName();
+
+        // Initialize header functionality
+        if (typeof initHeader === 'function') {
+          initHeader();
+        }
+
+        // Telegram setup
+        const tg = window.Telegram?.WebApp;
+        if (typeof tg.setHeaderColor === 'function') {
+          tg.setHeaderColor('#eef2f6');
+        }
+        if (typeof tg.setBackgroundColor === 'function') {
+          tg.setBackgroundColor('#e2e6ed');
+        }
+        if (typeof tg.BackButton === 'object') {
+          tg.BackButton.show();
+          tg.BackButton.onClick(() => {
+            window.location.href = 'index.html';
+          });
+        }
+      })();
+
+      // FAQ System - wait for DOM to be ready
+      document.addEventListener('DOMContentLoaded', () => {
+        const faqAnswers = {
+          about: "mymetrica - это ваш умный помощник для управления здоровьем! Я помогаю расшифровывать анализы простым языком, хранить всю медкарту в одном месте и напоминать о приеме лекарств. Больше не нужно гуглить сложные медицинские термины - я сделаю это за вас! 🏥✨",
+          howto: "Очень просто! 📸 Сделайте фото результата анализов или загрузите PDF файл. Я автоматически распознаю все показатели и объясню каждый из них понятным языком. Вы также можете добавить результаты в свою медкарту для отслеживания динамики. Всё безопасно и быстро! 📊",
+          security: "Ваши данные под надёжной защитой! 🔐 Все медицинские данные шифруются и хранятся на защищённых серверах. Я использую современные протоколы безопасности и передаю информацию только по зашифрованным каналам. Ваша конфиденциальность - мой главный приоритет. Только вы имеете доступ к своей медкарте! 🛡️"
+        };
+
+        function typeWriter(element, text, speed = 30) {
+          return new Promise((resolve) => {
+            let i = 0;
+            element.textContent = '';
+            element.classList.add('faq-message--typing');
+            
+            function type() {
+              if (i < text.length) {
+                element.textContent += text.charAt(i);
+                i++;
+                setTimeout(type, speed);
+              } else {
+                element.classList.remove('faq-message--typing');
+                resolve();
+              }
+            }
+            
+            type();
+          });
+        }
+
+        async function showFAQ(question) {
+          const faqChat = document.getElementById('faqChat');
+          const faqMessages = document.getElementById('faqMessages');
+          const decodeText = document.querySelector('.decode-empty__text');
+          const aiVisual = document.querySelector('.ai-visual');
+          
+          console.log('FAQ clicked:', question); // Debug log
+          
+          // Hide the PDF hint and AI visual logo only on first question
+          if (decodeText) {
+            decodeText.style.display = 'none';
+          }
+          if (aiVisual) {
+            aiVisual.style.display = 'none';
+          }
+          
+          // Show chat container
+          faqChat.style.display = 'block';
+          
+          // Get existing messages from localStorage or create new array
+          let chatHistory = JSON.parse(localStorage.getItem('faqChatHistory') || '[]');
+          
+          // Get question text and answer
+          const questionButton = document.querySelector(`[data-question="${question}"]`);
+          const questionText = questionButton.textContent;
+          const answerText = faqAnswers[question];
+          
+          console.log('Question:', questionText, 'Answer:', answerText); // Debug log
+          
+          // Add new messages to history
+          chatHistory.push({
+            type: 'question',
+            text: questionText,
+            timestamp: Date.now()
+          });
+          
+          chatHistory.push({
+            type: 'answer', 
+            text: answerText,
+            timestamp: Date.now()
+          });
+          
+          // Save updated history to localStorage
+          localStorage.setItem('faqChatHistory', JSON.stringify(chatHistory));
+          
+          // Hide asked question button and center others
+          questionButton.style.display = 'none';
+          const remainingButtons = document.querySelectorAll('.quick-chip:not([style*="display: none"])');
+          remainingButtons.forEach(btn => {
+            btn.style.margin = '0 4px';
+          });
+          
+          // Render all messages from history
+          renderChatHistory(chatHistory, true);
+        }
+
+        function renderChatHistory(history, isNewMessage = false) {
+          const faqMessages = document.getElementById('faqMessages');
+          
+          if (!isNewMessage) {
+            // Full render only on initial load
+            faqMessages.innerHTML = '';
+            
+            history.forEach((message, index) => {
+              const messageEl = document.createElement('div');
+              messageEl.className = `faq-message faq-message--${message.type}`;
+              
+              if (message.type === 'question') {
+                messageEl.textContent = message.text;
+                faqMessages.appendChild(messageEl);
+              } else {
+                // For answers, add typing animation only on initial load
+                faqMessages.appendChild(messageEl);
+                messageEl.textContent = message.text; // Show immediately without typing
+                messageEl.classList.remove('faq-message--typing');
+              }
+            });
+          } else {
+            // Append only new messages
+            const lastTwoMessages = history.slice(-2);
+            
+            lastTwoMessages.forEach((message, index) => {
+              const messageEl = document.createElement('div');
+              messageEl.className = `faq-message faq-message--${message.type}`;
+              
+              if (message.type === 'question') {
+                messageEl.textContent = message.text;
+                faqMessages.appendChild(messageEl);
+              } else {
+                // For new answer, add typing animation
+                faqMessages.appendChild(messageEl);
+                typeWriter(messageEl, message.text);
+              }
+            });
+          }
+          
+          // Auto-scroll to bottom after rendering
+          setTimeout(() => {
+            const faqChat = document.getElementById('faqChat');
+            faqChat.scrollTop = faqChat.scrollHeight;
+          }, 100);
+        }
+
+        // Load chat history on page load
+        function loadChatHistory() {
+          const chatHistory = JSON.parse(localStorage.getItem('faqChatHistory') || '[]');
+          if (chatHistory.length > 0) {
+            const faqChat = document.getElementById('faqChat');
+            const decodeText = document.querySelector('.decode-empty__text');
+            const aiVisual = document.querySelector('.ai-visual');
+            
+            // Hide initial elements if there's history
+            if (decodeText) decodeText.style.display = 'none';
+            if (aiVisual) aiVisual.style.display = 'none';
+            faqChat.style.display = 'block';
+            
+            // Hide already asked questions
+            const askedQuestions = chatHistory.filter(msg => msg.type === 'question').map(msg => msg.text);
+            document.querySelectorAll('.quick-chip[data-question]').forEach(button => {
+              if (askedQuestions.includes(button.textContent)) {
+                button.style.display = 'none';
+              }
+            });
+            
+            // Center remaining buttons
+            const remainingButtons = document.querySelectorAll('.quick-chip:not([style*="display: none"])');
+            remainingButtons.forEach(btn => {
+              btn.style.margin = '0 4px';
+            });
+            
+            // Render existing messages
+            renderChatHistory(chatHistory);
+          }
+        }
+
+        // Add click handlers to FAQ buttons
+        document.querySelectorAll('.quick-chip[data-question]').forEach(button => {
+          console.log('Button found:', button.dataset.question); // Debug log
+          button.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // Prevent page refresh
+            const question = button.dataset.question;
+            console.log('Button clicked:', question); // Debug log
+            showFAQ(question);
+          });
+        });
+
+        // Load chat history on page load
+        loadChatHistory();
+      });
+    </script>
+  </body>
+</html>

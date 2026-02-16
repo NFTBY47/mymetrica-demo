@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="format-detection" content="telephone=no">
+    <title>Медкарта — mymetrica</title>
+    <link rel="stylesheet" href="styles/styles.css" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+      (() => {
+        const tg = window.Telegram?.WebApp;
+        if (!tg) return;
+
+        const ua = navigator.userAgent || '';
+        const isRealTelegram =
+          /Telegram/i.test(ua) ||
+          (typeof tg.platform === 'string' && tg.platform !== 'unknown') ||
+          (typeof tg.initData === 'string' && tg.initData.length > 0) ||
+          Boolean(tg.initDataUnsafe?.user);
+        if (!isRealTelegram) return;
+
+        document.documentElement.classList.add('is-telegram');
+
+        const setVars = () => {
+          const raw = Number(tg.viewportHeight);
+          const h = Number.isFinite(raw) ? raw : 0;
+          const nextH = h >= 200 ? h : window.innerHeight;
+          document.documentElement.style.setProperty('--tg-viewport-height', `${nextH}px`);
+
+          const top = tg.safeAreaInset?.top;
+          const bottom = tg.safeAreaInset?.bottom;
+          const safeTop = typeof top === 'number' ? top : 0;
+          const safeBottom = typeof bottom === 'number' ? bottom : 0;
+          if (typeof top === 'number') document.documentElement.style.setProperty('--safe-top', `${safeTop}px`);
+          if (typeof bottom === 'number') document.documentElement.style.setProperty('--safe-bottom', `${safeBottom}px`);
+
+          const ct = tg.contentSafeAreaInset?.top;
+          const cr = tg.contentSafeAreaInset?.right;
+          const cb = tg.contentSafeAreaInset?.bottom;
+          const cl = tg.contentSafeAreaInset?.left;
+
+          const topInset = typeof ct === 'number' && ct > 0 ? ct : safeTop + 52;
+          const rightInset = typeof cr === 'number' && cr > 0 ? cr : 0;
+          const bottomInset = typeof cb === 'number' && cb > 0 ? cb : safeBottom;
+          const leftInset = typeof cl === 'number' && cl > 0 ? cl : 0;
+
+          document.documentElement.style.setProperty('--tg-content-top', `${topInset}px`);
+          document.documentElement.style.setProperty('--tg-content-right', `${rightInset}px`);
+          document.documentElement.style.setProperty('--tg-content-bottom', `${bottomInset}px`);
+          document.documentElement.style.setProperty('--tg-content-left', `${leftInset}px`);
+        };
+
+        const goFullscreen = () => {
+          try {
+            if (typeof tg.expand === 'function') tg.expand();
+
+            if (
+              typeof tg.requestFullscreen === 'function' &&
+              (typeof tg.isVersionAtLeast !== 'function' || tg.isVersionAtLeast('6.1'))
+            ) {
+              tg.requestFullscreen();
+            }
+          } catch {
+          }
+          setVars();
+        };
+
+        tg.ready?.();
+        goFullscreen();
+        setTimeout(goFullscreen, 0);
+        setTimeout(goFullscreen, 60);
+        setTimeout(goFullscreen, 300);
+
+        if (typeof tg.onEvent === 'function') {
+          tg.onEvent('viewportChanged', goFullscreen);
+        }
+      })();
+
+      // Fallback for non-Telegram environment
+      if (!window.Telegram?.WebApp) {
+        document.documentElement.style.setProperty('--safe-top', '0px');
+        document.documentElement.style.setProperty('--safe-bottom', '0px');
+        document.documentElement.style.setProperty('--tg-content-top', '52px');
+        document.documentElement.style.setProperty('--tg-content-right', '0px');
+        document.documentElement.style.setProperty('--tg-content-bottom', '0px');
+        document.documentElement.style.setProperty('--tg-content-left', '0px');
+        console.log('Medcard: Set fallback CSS vars');
+      }
+
+      // Telegram BackButton setup
+      if (window.Telegram?.WebApp) {
+        const tg = window.Telegram.WebApp;
+        if (typeof tg.BackButton === 'object') {
+          tg.BackButton.show();
+          tg.BackButton.onClick(() => {
+            window.location.href = 'index.html';
+          });
+        }
+        // Set colors for consistency
+        if (typeof tg.setHeaderColor === 'function') {
+          tg.setHeaderColor('#eef2f6');
+        }
+        if (typeof tg.setBackgroundColor === 'function') {
+          tg.setBackgroundColor('#e2e6ed');
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <section class="profile-hero" aria-label="Аккаунт">
+        <div class="profile-hero__bg"></div>
+        <div class="profile-hero__content">
+          <div class="avatar" role="img" aria-label="Аватар">
+            <svg class="avatar__icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 12a3.6 3.6 0 100-7.2 3.6 3.6 0 000 7.2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M5.5 20a6.5 6.5 0 0113 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="profile-hero__meta">
+            <div class="profile-hero__name" id="currentName">Пользователь</div>
+            <div class="profile-hero__hint">Медкарта</div>
+          </div>
+          <div class="profile-hero__actions">
+            <button class="round-btn" type="button" data-action="support" aria-label="Поддержка">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 12a8 8 0 0116 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6 12v4a2 2 0 01-2-2v-1a2 2 0 012-2zm12 0v4a2 2 0 002-2v-1a2 2 0 00-2-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="round-btn" type="button" data-action="notifications" aria-label="Уведомления">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M13.73 21a2 2 0 01-3.46 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <main class="content" aria-label="Медкарта">
+        <div class="medcard-empty">
+          <div class="medcard-empty__visual">
+            <div class="medcard-empty__card">
+              <svg class="medcard-empty__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M14 2v6h6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 13h2l1-2 2 4 1-2h2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 17H8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="medcard-empty__scan"></div>
+            </div>
+          </div>
+          
+          <div class="medcard-empty__content">
+            <h2 class="medcard-empty__title">
+              <a href="decode.html" class="medcard-empty__link">Расшифруйте анализ</a> для добавления в медкарту
+            </h2>
+            <div class="medcard-empty__text">
+              Загрузите фото или PDF с результатами анализов, и я добавлю их в вашу медкарту с расшифровкой
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="scripts/app.js"></script>
+    <script>
+      (() => {
+        if (window.__mymetricaMainReady) return;
+
+        const fallbackToast = (msg) => {
+          const el = document.getElementById('toast');
+          if (!el) return;
+          el.textContent = msg;
+          el.classList.add('is-visible');
+          clearTimeout(el.__t);
+          el.__t = setTimeout(() => el.classList.remove('is-visible'), 2200);
+        };
+
+        // Initialize
+        applyUserName();
+
+        // Initialize header functionality
+        if (typeof initHeader === 'function') {
+          initHeader();
+        }
+
+        // Telegram setup
+        const tg = window.Telegram?.WebApp;
+        if (typeof tg.setHeaderColor === 'function') {
+          tg.setHeaderColor('#eef2f6');
+        }
+        if (typeof tg.setBackgroundColor === 'function') {
+          tg.setBackgroundColor('#e2e6ed');
+        }
+        if (typeof tg.BackButton === 'object') {
+          tg.BackButton.show();
+          tg.BackButton.onClick(() => {
+            window.location.href = 'index.html';
+          });
+        }
+      })();
+    </script>
+    <script src="scripts/medcard.js"></script>
+  </body>
+</html>
