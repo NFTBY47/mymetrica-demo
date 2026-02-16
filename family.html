@@ -413,6 +413,239 @@
         flex-shrink: 0;
       }
 
+      .family-table {
+        background: 
+          linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.25) 0%, 
+            rgba(255, 255, 255, 0.1) 100%),
+          linear-gradient(135deg, 
+            rgba(52, 199, 89, 0.03) 0%, 
+            rgba(0, 122, 255, 0.03) 100%);
+        border: 1px solid 
+          rgba(255, 255, 255, 0.2),
+          rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        overflow: hidden;
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        box-shadow: 
+          0 20px 60px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        position: relative;
+        width: 100%;
+      }
+
+      .family-table::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, 
+          transparent, 
+          rgba(255, 255, 255, 0.4), 
+          transparent);
+      }
+
+      .family-table__header {
+        padding: 32px 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 8px;
+      }
+
+      .family-table__title {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text);
+        letter-spacing: -0.02em;
+      }
+
+      .family-table__count {
+        font-size: 15px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .family-table__body {
+        min-height: 200px;
+        position: relative;
+      }
+
+      .family-table__empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        text-align: center;
+      }
+
+      .family-table__empty-icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+        opacity: 0.3;
+      }
+
+      .family-table__empty-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+
+      .family-table__empty-description {
+        font-size: 14px;
+        color: var(--muted);
+        line-height: 1.4;
+        max-width: 280px;
+      }
+
+      .family-table__members {
+        padding: 16px;
+      }
+
+      .family-member-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+      }
+
+      .family-member-row:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-1px);
+      }
+
+      .family-member-row__avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .family-member-row__avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .family-member-row__info {
+        flex: 1;
+      }
+
+      .family-member-row__name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 4px;
+      }
+
+      .family-member-row__role {
+        font-size: 14px;
+        color: var(--muted);
+        font-weight: 500;
+      }
+
+      .family-member-row__status {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #34c759;
+        flex-shrink: 0;
+      }
+
+      .family-table__footer {
+        padding: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .family-table__add-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 16px;
+        background: 
+          linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.35) 0%, 
+            rgba(255, 255, 255, 0.15) 100%),
+          linear-gradient(135deg, 
+            rgba(52, 199, 89, 0.05) 0%, 
+            rgba(0, 122, 255, 0.05) 100%);
+        border: 2px solid 
+          rgba(0, 0, 0, 0.2),
+          rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 
+          0 8px 20px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .family-table__add-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+          rgba(255, 255, 255, 0.1) 0%, 
+          rgba(255, 255, 255, 0.05) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .family-table__add-btn:hover::before {
+        opacity: 1;
+      }
+
+      .family-table__add-btn:hover {
+        background: 
+          linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.45) 0%, 
+            rgba(255, 255, 255, 0.25) 100%),
+          linear-gradient(135deg, 
+            rgba(52, 199, 89, 0.08) 0%, 
+            rgba(0, 122, 255, 0.08) 100%);
+        border-color: 
+          rgba(0, 0, 0, 0.3),
+          rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 
+          0 12px 30px rgba(0, 0, 0, 0.15),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      }
+
+      .family-table__add-btn:active {
+        transform: translateY(0);
+      }
+
       .share-qr-btn:hover {
         background: #0056cc;
         transform: translateY(-2px);
@@ -423,6 +656,7 @@
         transform: translateY(0);
       }
 
+      
       @media (max-width: 480px) {
         .qr-modal__content {
           width: 95%;
@@ -554,75 +788,63 @@
             <div class="profile-hero__hint">Семья</div>
           </div>
           <div class="profile-hero__actions">
-            <button class="round-btn" type="button" data-action="support" aria-label="Поддержка">
-              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 12a8 8 0 0116 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                <path d="M6 12v4a2 2 0 01-2-2v-1a2 2 0 012-2zm12 0v4a2 2 0 002-2v-1a2 2 0 00-2-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <button class="round-btn" type="button" onclick="showQRModal()" aria-label="QR-код">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="8" height="8" rx="1"/>
+                <rect x="13" y="3" width="8" height="8" rx="1"/>
+                <rect x="3" y="13" width="8" height="8" rx="1"/>
+                <rect x="17" y="17" width="4" height="4" rx="1" fill="currentColor"/>
               </svg>
             </button>
-            <button class="round-btn" type="button" data-action="notifications" aria-label="Уведомления">
-              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M13.73 21a2 2 0 01-3.46 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <button class="round-btn" type="button" onclick="openQRScanner()" aria-label="Сканер">
+              <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="3"/>
               </svg>
             </button>
           </div>
         </div>
       </section>
 
-      <main class="content" aria-label="Экран семьи">
-        <section class="menu" aria-label="Члены семьи">
-          <div class="glass-card" style="margin: 16px; margin-bottom: 0;">
-            <div class="glass-card__title">Ваш QR-код</div>
-            <div class="muted" style="margin-top: 8px; font-weight: 700; line-height: 1.4;">Поделитесь этим QR-кодом для добавления в семейный профиль</div>
-          
-          <div class="personal-qr-container" style="margin-top: 32px; text-align: center;">
-            <div class="qr-glass-card">
-              <div class="qr-glass-card__header">
-                <div class="qr-glass-card__avatar">
-                  <div class="avatar" style="width: 60px; height: 60px;">
-                    <svg class="avatar__icon" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M12 12a3.6 3.6 0 100-7.2 3.6 3.6 0 000 7.2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                      <path d="M5.5 20a6.5 6.5 0 0113 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <main class="content" aria-label="Экран семьи" style="display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 200px);">
+        <section class="menu" aria-label="Члены семьи" style="width: 100%; max-width: 500px;">
+          <div class="family-table-container">
+            <div class="family-table">
+              <div class="family-table__header">
+                <div class="family-table__title">Семейный профиль</div>
+                <div class="family-table__count" id="familyCount">0 участников</div>
+              </div>
+              
+              <div class="family-table__body" id="familyTableBody">
+                <!-- Empty state -->
+                <div class="family-table__empty" id="familyEmptyState">
+                  <div class="family-table__empty-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
+                      <circle cx="9" cy="7" r="3"/>
+                      <path d="M19 8v6"/>
+                      <path d="M16 11h6"/>
                     </svg>
                   </div>
+                  <div class="family-table__empty-title">Нет членов семьи</div>
+                  <div class="family-table__empty-description">Отсканируйте QR-код или поделитесь своим для добавления членов семьи</div>
                 </div>
-                <div class="qr-glass-card__info">
-                  <div class="qr-glass-card__name" id="personalQRName">Ваш профиль</div>
-                  <div class="qr-glass-card__status">Готов к сканированию</div>
-                </div>
-              </div>
-              
-              <div class="qr-glass-card__code">
-                <div class="qr-code-large">
-                  <div class="qr-code-large__content" id="qrCodeContent">
-                    <!-- QR code will be generated here -->
-                  </div>
-                </div>
-              </div>
-              
-              <div class="qr-glass-card__actions">
-                <button class="glass-btn glass-btn--primary" onclick="shareQRCode()">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M16 6l-4-4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M12 2v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  <span>Поделиться</span>
-                </button>
                 
-                <button class="glass-btn glass-btn--secondary" onclick="scanQRCode()">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <rect x="3" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="2"/>
-                    <rect x="13" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="2"/>
-                    <rect x="3" y="13" width="8" height="8" rx="1" stroke="currentColor" stroke-width="2"/>
-                    <rect x="17" y="17" width="4" height="4" rx="1" fill="currentColor"/>
+                <!-- Family members will be added here dynamically -->
+                <div class="family-table__members" id="familyMembers" style="display: none;">
+                  <!-- Members will be added here -->
+                </div>
+              </div>
+              
+              <div class="family-table__footer">
+                <button class="family-table__add-btn" onclick="showAddMemberOptions()">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 5v14M5 12h14"/>
                   </svg>
-                  <span>Сканировать</span>
+                  <span>Добавить члена семьи</span>
                 </button>
               </div>
             </div>
-          </div>
           </div>
         </section>
       </main>
@@ -657,11 +879,14 @@
     </div>
 
     <script>
+      // Family members storage (simulated without backend)
+      let familyMembers = [];
+      
       // Personal QR Code functionality
-      function generatePersonalQR() {
-        const qrContent = document.getElementById('qrCodeContent');
-        const userNameEl = document.getElementById('personalQRName');
-        const avatarEl = document.querySelector('.qr-glass-card__avatar .avatar');
+      function showQRModal() {
+        const modal = document.getElementById('qrModal');
+        const userNameEl = document.getElementById('qrUserName');
+        const qrCodeEl = document.getElementById('qrCode');
         
         // Get user data from Telegram
         const tg = window.Telegram?.WebApp;
@@ -669,62 +894,83 @@
         const userName = user?.first_name || 'Пользователь';
         const userId = user?.id || 'unknown';
         
-        // Update user name
         userNameEl.textContent = userName;
         
-        // Update user avatar
-        if (user?.photo_url && avatarEl) {
-          const img = document.createElement('img');
-          img.src = user.photo_url;
-          img.alt = userName;
-          img.style.cssText = 'width: 100%; height: 100%; object-fit: cover; border-radius: 50%;';
-          img.onerror = () => {
-            console.log('Failed to load user avatar in QR card, keeping default');
-          };
-          img.onload = () => {
-            console.log('User avatar loaded successfully in QR card');
-          };
-          avatarEl.innerHTML = '';
-          avatarEl.appendChild(img);
-        }
-        
         // Clear previous QR code
-        qrContent.innerHTML = '';
+        qrCodeEl.innerHTML = '';
         
         // Generate real QR code
         const qrData = `mymetrica://family/add/${userId}`;
         try {
-          new QRCode(qrContent, {
+          new QRCode(qrCodeEl, {
             text: qrData,
-            width: 200,
-            height: 200,
+            width: 180,
+            height: 180,
             colorDark: "#000000",
             colorLight: "#ffffff",
             correctLevel: QRCode.CorrectLevel.H
           });
         } catch (error) {
           console.error('Error generating QR code:', error);
-          // Fallback to placeholder
-          qrContent.innerHTML = `
-            <div style="font-size: 10px; color: #000; opacity: 0.4; text-align: center; padding: 10px;">
-              ${qrData}
-            </div>
-          `;
+          qrCodeEl.innerHTML = `<div style="font-size: 12px; color: #000; opacity: 0.4; text-align: center; padding: 20px;">${qrData}</div>`;
+        }
+        
+        // Show modal
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+      
+      function openQRScanner() {
+        const tg = window.Telegram?.WebApp;
+        
+        // Simulate QR scan result (without backend)
+        setTimeout(() => {
+          // Simulate scanned user data
+          const scannedUser = {
+            id: 'scanned_' + Date.now(),
+            name: 'Анна',
+            photo_url: null,
+            role: 'Член семьи'
+          };
+          
+          addFamilyMember(scannedUser);
+          
+          // Show success message
+          if (tg?.showAlert) {
+            tg.showAlert(`Пользователь ${scannedUser.name} добавлен в семейный профиль!`);
+          } else {
+            alert(`Пользователь ${scannedUser.name} добавлен в семейный профиль!`);
+          }
+        }, 2000);
+        
+        // Show scan QR functionality
+        if (tg?.showScanQR) {
+          tg.showScanQR();
+        } else {
+          // Fallback - show instructions
+          if (tg?.showAlert) {
+            tg.showAlert('Сканирование QR-кода доступно в Telegram. Нажмите на QR-код другого пользователя и выберите "Сканировать".');
+          } else {
+            alert('Сканирование QR-кода доступно в Telegram. Нажмите на QR-код другого пользователя и выберите "Сканировать".');
+          }
         }
       }
       
-      function shareQRCode() {
+      function showAddMemberOptions() {
         const tg = window.Telegram?.WebApp;
         const user = tg?.initDataUnsafe?.user;
         const userId = user?.id || 'unknown';
         const userName = user?.first_name || 'Пользователь';
         
-        const shareText = `Добавьте меня в семейный профиль mymetrica!\n\nИмя: ${userName}\nQR-код: mymetrica://family/add/${userId}`;
+        // Create shareable link that works when clicked
+        const shareLink = `https://t.me/mymetrica_bot?start=family_${userId}`;
+        const shareText = `Добавь меня в семейный профиль mymetrica!\n\nИмя: ${userName}\nНажми на ссылку: ${shareLink}`;
         
+        // Share directly to Telegram
         if (tg?.shareText) {
           tg.shareText(shareText);
         } else if (tg?.openTelegramLink) {
-          tg.openTelegramLink(`https://t.me/share/url?url=mymetrica://family/add/${userId}&text=${encodeURIComponent(shareText)}`);
+          tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(shareText)}`);
         } else {
           // Fallback - copy to clipboard
           navigator.clipboard.writeText(shareText).then(() => {
@@ -735,15 +981,43 @@
         }
       }
       
-      function scanQRCode() {
-        const tg = window.Telegram?.WebApp;
+      function addFamilyMember(member) {
+        familyMembers.push(member);
+        updateFamilyDisplay();
+      }
+      
+      function updateFamilyDisplay() {
+        const emptyState = document.getElementById('familyEmptyState');
+        const membersContainer = document.getElementById('familyMembers');
+        const countEl = document.getElementById('familyCount');
         
-        // Show scan QR functionality
-        if (tg?.showScanQR) {
-          tg.showScanQR();
+        countEl.textContent = `${familyMembers.length} участник${familyMembers.length !== 1 ? 'ов' : ''}`;
+        
+        if (familyMembers.length === 0) {
+          emptyState.style.display = 'flex';
+          membersContainer.style.display = 'none';
         } else {
-          // Fallback - open camera or show instructions
-          alert('Сканирование QR-кода доступно в Telegram. Нажмите на QR-код другого пользователя и выберите "Сканировать".');
+          emptyState.style.display = 'none';
+          membersContainer.style.display = 'block';
+          
+          membersContainer.innerHTML = familyMembers.map(member => `
+            <div class="family-member-row">
+              <div class="family-member-row__avatar">
+                ${member.photo_url ? 
+                  `<img src="${member.photo_url}" alt="${member.name}">` : 
+                  `<svg class="avatar__icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 12a3.6 3.6 0 100-7.2 3.6 3.6 0 000 7.2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M5.5 20a6.5 6.5 0 0113 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>`
+                }
+              </div>
+              <div class="family-member-row__info">
+                <div class="family-member-row__name">${member.name}</div>
+                <div class="family-member-row__role">${member.role}</div>
+              </div>
+              <div class="family-member-row__status"></div>
+            </div>
+          `).join('');
         }
       }
       
@@ -767,8 +1041,8 @@
         }
       });
 
-      // Initialize personal QR code
-      generatePersonalQR();
+      // Initialize family display
+      updateFamilyDisplay();
 
       // Initialize header functionality
       if (typeof initHeader === 'function') {
